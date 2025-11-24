@@ -20,9 +20,9 @@ Lua:
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Disable netrw completely in favor of neo-tree
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- Disable netrw completely
+-- vim.g.loaded_netrw = 1
+-- vim.g.loaded_netrwPlugin = 1
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
@@ -1003,6 +1003,7 @@ require('lazy').setup(
         { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
       },
       opts = {
+        close_if_last_window = true, -- Close Neo-tree if it is the last window left in the tab
         filesystem = {
           window = {
             position = 'right',
@@ -1010,6 +1011,12 @@ require('lazy').setup(
               ['\\'] = 'close_window',
             },
           },
+          hijack_netrw_behavior = 'disabled',
+          -- 'open_default', -- netrw disabled, opening a directory opens neo-tree
+          -- in whatever position is specified in window.position
+          -- "open_current",  -- netrw disabled, opening a directory opens within the
+          -- window like netrw would, regardless of window.position
+          -- "disabled",    -- netrw left alone, neo-tree does not handle opening dirs
         },
       },
     }, -- }}}
