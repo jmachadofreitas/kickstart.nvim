@@ -6,6 +6,8 @@ Help:
     - `:help`
     - keymap "<space>sh" to [s]earch the [h]elp documentation,
     - `:checkhealth`
+    - Folds zo zO zc zC zR ...
+    - Create fold zf
 
 Lua:
     - https://learnxinyminutes.com/docs/lua/
@@ -103,6 +105,9 @@ vim.o.smartindent = true -- syntax aware indentations for newline inserts
 vim.o.tabstop = 4 -- num of space characters per tab
 vim.o.shiftwidth = 4 -- spaces per indentation level
 
+-- remove underscore for snake_case
+vim.opt.iskeyword:remove '_'
+
 -- }}}
 
 -- [[ Basic Keymaps ]]{{{
@@ -111,6 +116,9 @@ vim.o.shiftwidth = 4 -- spaces per indentation level
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Last used buffer
+vim.keymap.set('n', '<leader><Tab>', '<C-^>', { desc = 'Alternate buffer' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -139,18 +147,30 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- tmux-sessionizer
-vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
-vim.keymap.set('n', '<C-F>', '<cmd>silent !tmux neww tmux-sessionizer -n<CR>')
-vim.keymap.set('n', '<M-h>', '<cmd>silent !tmux neww tmux-sessionizer -s 0<CR>')
-vim.keymap.set('n', '<M-t>', '<cmd>silent !tmux neww tmux-sessionizer -s 1<CR>')
-vim.keymap.set('n', '<M-n>', '<cmd>silent !tmux neww tmux-sessionizer -s 2<CR>')
-vim.keymap.set('n', '<M-s>', '<cmd>silent !tmux neww tmux-sessionizer -s 3<CR>')
+-- vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
+-- vim.keymap.set('n', '<C-F>', '<cmd>silent !tmux neww tmux-sessionizer -n<CR>')
+-- vim.keymap.set('n', '<M-h>', '<cmd>silent !tmux neww tmux-sessionizer -s 0<CR>')
+-- vim.keymap.set('n', '<M-t>', '<cmd>silent !tmux neww tmux-sessionizer -s 1<CR>')
+-- vim.keymap.set('n', '<M-n>', '<cmd>silent !tmux neww tmux-sessionizer -s 2<CR>')
+-- vim.keymap.set('n', '<M-s>', '<cmd>silent !tmux neww tmux-sessionizer -s 3<CR>')
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })}}}
+-- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+
+-- Open cheatsheet
+vim.keymap.set('n', '<leader>cs', function()
+  vim.cmd('edit ' .. vim.fn.stdpath 'config' .. '/CHEATSHEET.md')
+end, { desc = 'Open CHEATSHEET.md' })
+
+-- Insert mode stuff
+vim.keymap.set('i', '<C-l>', '<C-o>A', { desc = 'Insert -> end of line' })
+vim.keymap.set('i', '<C-h>', '<C-o>I', { desc = 'Insert -> start of line' })
+vim.keymap.set('i', '<C-d>', '<C-o>dw', { desc = 'Insert -> delete next word' })
+
+-- }}}
 
 -- [[ Basic Autocommands ]]{{{
 --  See `:help lua-guide-autocommands`
@@ -1057,7 +1077,7 @@ require('lazy').setup(
         --   harpoon.ui:toggle_quick_menu(harpoon:list())
         -- end, { desc = 'Harpoon: Quick Menu' })
 
-        vim.keymap.set('n', '<C-e>', function()
+        vim.keymap.set('n', '<leader>e', function()
           toggle_telescope(harpoon:list())
         end, { desc = 'Open harpoon window' })
 
@@ -1315,6 +1335,21 @@ require('lazy').setup(
       opts = {},
     }, -- }}}
 
+    -- cheatsheet {{{
+    {
+      'sudormrfbin/cheatsheet.nvim',
+      dependencies = {
+        'nvim-telescope/telescope.nvim',
+        'nvim-lua/plenary.nvim',
+      },
+      config = function()
+        require('cheatsheet').setup {
+          bundled_cheatsheets = false, -- disable default Vim cheats
+          bundled_plugin_cheatsheets = false, -- disable plugin cheats
+        }
+      end,
+    },
+    -- }}}
     -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
     --
     --  Here are some example plugins that I've included in the Kickstart repository.
