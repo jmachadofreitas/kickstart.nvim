@@ -163,7 +163,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 -- Open cheatsheet
 vim.keymap.set('n', '<leader>cs', function()
-  vim.cmd('edit ' .. vim.fn.stdpath 'config' .. '/CHEATSHEET.md')
+  vim.cmd('edit ' .. vim.fn.stdpath 'config' .. '/CHEATSHEET.md', { desc = 'Open Cheatsheet.md' })
 end, { desc = 'Open CHEATSHEET.md' })
 
 -- Insert mode stuff
