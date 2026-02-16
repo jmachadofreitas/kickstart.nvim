@@ -121,7 +121,8 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader><Tab>', '<C-^>', { desc = 'Alternate buffer' })
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [L]ocation list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -170,6 +171,14 @@ vim.keymap.set('i', '<C-l>', '<C-o>A', { desc = 'Insert -> end of line' })
 vim.keymap.set('i', '<C-h>', '<C-o>I', { desc = 'Insert -> start of line' })
 vim.keymap.set('i', '<C-d>', '<C-o>dw', { desc = 'Insert -> delete next word' })
 
+-- Toggle warnings
+-- Enable diagnostics only on the current buffer
+vim.keymap.set('n', '<leader>tw', function()
+  local enabled = vim.diagnostic.is_enabled { bufnr = 0 }
+  vim.diagnostic.enable(not enabled, { bufnr = 0 })
+  print('Diagnostics (buffer): ' .. ((not enabled) and 'ON' or 'OFF'))
+end, { desc = '[T]oggle diagnostics (buffer)' })
+
 -- }}}
 
 -- [[ Basic Autocommands ]]{{{
@@ -195,7 +204,16 @@ vim.api.nvim_create_autocmd('BufReadPost', {
       vim.api.nvim_win_set_cursor(0, { line, mark[2] })
     end
   end,
-}) -- }}}
+})
+
+-- Enable diagnostics in the current buffer
+vim.api.nvim_create_autocmd('BufEnter', {
+  callback = function()
+    vim.diagnostic.enable(false, { bufnr = 0 })
+  end,
+})
+
+-- }}}
 
 -- [[ Install `lazy.nvim` plugin manager ]]{{{
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -378,10 +396,13 @@ require('lazy').setup(
         },
 
         -- Document existing key chains
+        -- Hunk When comparing two files, diff finds sequences of lines common to both files,
+        -- interspersed with groups of differing lines called hunks.
         spec = {
           { '<leader>s', group = '[S]earch' },
           { '<leader>t', group = '[T]oggle' },
-          { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+          { '<leader>h', group = '[H]arpoon' },
+          { '<leader>g', group = '[G]it Hunk', mode = { 'n', 'v' } },
         },
       },
     }, -- }}}
@@ -1048,6 +1069,67 @@ require('lazy').setup(
       dependencies = { 'nvim-lua/plenary.nvim' },
       config = function()
         local harpoon = require 'harpoon'
+        harpoon:setup {}
+
+        -- basic telescope configuration
+        local conf = require('telescope.config').values
+        local function toggle_telescope(harpoon_files)
+          local file_paths = {}
+          for _, item in ipairs(harpoon_files.items) do
+            table.insert(file_paths, item.value)
+          end
+
+          require('telescope.pickers')
+            .new({}, {
+              prompt_title = 'Harpoon',
+              finder = require('telescope.finders').new_table { results = file_paths },
+              previewer = conf.file_previewer {},
+              sorter = conf.generic_sorter {},
+            })
+            :find()
+        end
+
+        -- Open Harpoon picker
+        vim.keymap.set('n', '<leader>e', function()
+          toggle_telescope(harpoon:list())
+        end, { desc = 'Harpoon: Open' })
+
+        -- Add current file
+        vim.keymap.set('n', '<leader>a', function()
+          harpoon:list():add()
+        end, { desc = 'Harpoon: [A]dd File' })
+
+        -- Slot jumps (no collision with split-nav)
+        vim.keymap.set('n', '<leader>h1', function()
+          harpoon:list():select(1)
+        end, { desc = 'Harpoon: Select 1' })
+        vim.keymap.set('n', '<leader>h2', function()
+          harpoon:list():select(2)
+        end, { desc = 'Harpoon: Select 2' })
+        vim.keymap.set('n', '<leader>h3', function()
+          harpoon:list():select(3)
+        end, { desc = 'Harpoon: Select 3' })
+        vim.keymap.set('n', '<leader>h4', function()
+          harpoon:list():select(4)
+        end, { desc = 'Harpoon: Select 4' })
+
+        -- Cycle Harpoon list
+        vim.keymap.set('n', '<leader>hp', function()
+          harpoon:list():prev()
+        end, { desc = 'Harpoon: Prev' })
+        vim.keymap.set('n', '<leader>hn', function()
+          harpoon:list():next()
+        end, { desc = 'Harpoon: Next' })
+      end,
+    },
+    -- }}}
+
+    {
+      'ThePrimeagen/harpoon',
+      branch = 'harpoon2',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+      config = function()
+        local harpoon = require 'harpoon'
 
         -- REQUIRED
         harpoon:setup {}
@@ -1125,6 +1207,9 @@ require('lazy').setup(
         lint.linters_by_ft = {
           markdown = { 'markdownlint' },
         }
+
+        -- Lint toggle (per buffer)
+        vim.b.lint_enabled = true
 
         -- To allow other plugins to add linters to require('lint').linters_by_ft,
         -- instead set linters_by_ft like this:
