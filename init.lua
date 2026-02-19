@@ -117,6 +117,21 @@ vim.opt.iskeyword:remove '_'
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- keywordprg: preserve the original behavior of K
+vim.keymap.set('n', '<leader>K', '<cmd>norm! K<cr>', { desc = 'Keywordprg' })
+
+-- Better indenting: reselect the previous visual region after indenting
+vim.keymap.set('x', '<', '<gv')
+vim.keymap.set('x', '>', '>gv')
+
+-- Save file
+vim.keymap.set({ 'i', 'x', 'n', 's' }, '<C-s>', '<cmd>w<cr><esc>', { desc = 'Save File' })
+
+-- quit
+vim.keymap.set('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
+
+vim.keymap.set('n', '<leader>z', ':wq<CR>')
+
 -- Last used buffer
 vim.keymap.set('n', '<leader><Tab>', '<C-^>', { desc = 'Alternate buffer' })
 
@@ -140,20 +155,20 @@ vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
---
+
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+-- vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+-- vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+-- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- tmux-sessionizer
--- vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
--- vim.keymap.set('n', '<C-F>', '<cmd>silent !tmux neww tmux-sessionizer -n<CR>')
--- vim.keymap.set('n', '<M-h>', '<cmd>silent !tmux neww tmux-sessionizer -s 0<CR>')
--- vim.keymap.set('n', '<M-t>', '<cmd>silent !tmux neww tmux-sessionizer -s 1<CR>')
--- vim.keymap.set('n', '<M-n>', '<cmd>silent !tmux neww tmux-sessionizer -s 2<CR>')
--- vim.keymap.set('n', '<M-s>', '<cmd>silent !tmux neww tmux-sessionizer -s 3<CR>')
+vim.keymap.set('n', '<C-x>g', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
+vim.keymap.set('n', '<C-x>o', '<cmd>silent !tmux neww tmux-sessionizer -n<CR>')
+vim.keymap.set('n', '<C-x>1', '<cmd>silent !tmux neww tmux-sessionizer -s 1<CR>')
+vim.keymap.set('n', '<C-x>2', '<cmd>silent !tmux neww tmux-sessionizer -s -1<CR>')
+vim.keymap.set('n', '<C-x>3', '<cmd>silent !tmux neww tmux-sessionizer -s 2<CR>')
+vim.keymap.set('n', '<C-x>4', '<cmd>silent !tmux neww tmux-sessionizer -s 3<CR>')
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -167,17 +182,66 @@ vim.keymap.set('n', '<leader>cs', function()
 end, { desc = 'Open CHEATSHEET.md' })
 
 -- Insert mode stuff
-vim.keymap.set('i', '<C-l>', '<C-o>A', { desc = 'Insert -> end of line' })
-vim.keymap.set('i', '<C-h>', '<C-o>I', { desc = 'Insert -> start of line' })
-vim.keymap.set('i', '<C-d>', '<C-o>dw', { desc = 'Insert -> delete next word' })
+vim.keymap.set('i', '<M-h>', '<C-o>db', { desc = 'Delete previous word' })
+vim.keymap.set('i', '<M-l>', '<C-o>de', { desc = 'Delete next word' })
 
--- Toggle warnings
+vim.keymap.set('i', '<C-n>', '<Down>', { desc = 'Move down' })
+vim.keymap.set('i', '<C-p>', '<Up>', { desc = 'Move up' })
+vim.keymap.set('i', '<C-b>', '<Left>', { desc = 'Move left' })
+vim.keymap.set('i', '<C-f>', '<Right>', { desc = 'Move right' })
+vim.keymap.set('i', '<C-a>', '<C-o>^', { desc = 'Goto start of line' })
+vim.keymap.set('i', '<C-e>', '<C-o>$', { desc = 'Goto end of line' })
+
+-- LazyVim
+-- Move to window using the <ctrl> hjkl keys
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to Left Window', remap = true })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to Lower Window', remap = true })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to Upper Window', remap = true })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to Right Window', remap = true })
+
+-- Resize window using <ctrl> arrow keys
+vim.keymap.set('n', '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Increase Window Height' })
+vim.keymap.set('n', '<C-Down>', '<cmd>resize -2<cr>', { desc = 'Decrease Window Height' })
+vim.keymap.set('n', '<C-Left>', '<cmd>vertical resize -2<cr>', { desc = 'Decrease Window Width' })
+vim.keymap.set('n', '<C-Right>', '<cmd>vertical resize +2<cr>', { desc = 'Increase Window Width' })
+
+-- Move Lines
+-- -- Normal mode
+-- vim.keymap.set('n', '<M-j>', ':m .+1<CR>==', { desc = 'Move line down' })
+-- vim.keymap.set('n', '<M-k>', ':m .-2<CR>==', { desc = 'Move line up' })
+-- vim.keymap.set('v', '<M-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+-- vim.keymap.set('v', '<M-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+-- vim.keymap.set('i', '<M-j>', '<C-o>:m .+1<CR><C-o>==', { desc = 'Move line down' })
+-- vim.keymap.set('i', '<M-k>', '<C-o>:m .-2<CR><C-o>==', { desc = 'Move line up' })
+vim.keymap.set('n', '<A-j>', "<cmd>execute 'move .+' . v:count1<cr>==", { desc = 'Move Down' })
+vim.keymap.set('n', '<A-k>', "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = 'Move Up' })
+vim.keymap.set('i', '<A-j>', '<esc><cmd>m .+1<cr>==gi', { desc = 'Move Down' })
+vim.keymap.set('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move Up' })
+vim.keymap.set('v', '<A-j>', ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = 'Move Down' })
+vim.keymap.set('v', '<A-k>', ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = 'Move Up' })
+
+-- buffers
+vim.keymap.set('n', '<S-h>', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
+vim.keymap.set('n', '<S-l>', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
+vim.keymap.set('n', '[b', '<cmd>bprevious<cr>', { desc = 'Prev Buffer' })
+vim.keymap.set('n', ']b', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
+vim.keymap.set('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
+vim.keymap.set('n', '<leader>`', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
+vim.keymap.set('n', '<leader>bd', function()
+  Snacks.bufdelete()
+end, { desc = 'Delete Buffer' })
+vim.keymap.set('n', '<leader>bo', function()
+  Snacks.bufdelete.other()
+end, { desc = 'Delete Other Buffers' })
+vim.keymap.set('n', '<leader>bD', '<cmd>:bd<cr>', { desc = 'Delete Buffer and Window' })
+
+-- Toggle diagnostics
 -- Enable diagnostics only on the current buffer
-vim.keymap.set('n', '<leader>tw', function()
+vim.keymap.set('n', '<leader>td', function()
   local enabled = vim.diagnostic.is_enabled { bufnr = 0 }
   vim.diagnostic.enable(not enabled, { bufnr = 0 })
   print('Diagnostics (buffer): ' .. ((not enabled) and 'ON' or 'OFF'))
-end, { desc = '[T]oggle diagnostics (buffer)' })
+end, { desc = '[T]oggle [D]iagnostics (buffer)' })
 
 -- }}}
 
@@ -210,6 +274,55 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 vim.api.nvim_create_autocmd('BufEnter', {
   callback = function()
     vim.diagnostic.enable(false, { bufnr = 0 })
+  end,
+})
+
+-- close some filetypes with <q>
+
+local function augroup(name)
+  return vim.api.nvim_create_augroup('lazyvim_' .. name, { clear = true })
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup 'close_with_q',
+  pattern = {
+    'PlenaryTestPopup',
+    'checkhealth',
+    'dbout',
+    'gitsigns-blame',
+    'grug-far',
+    'help',
+    'lspinfo',
+    'neotest-output',
+    'neotest-output-panel',
+    'neotest-summary',
+    'notify',
+    'qf',
+    'spectre_panel',
+    'startuptime',
+    'tsplayground',
+  },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.schedule(function()
+      vim.keymap.set('n', 'q', function()
+        vim.cmd 'close'
+        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+      end, {
+        buffer = event.buf,
+        silent = true,
+        desc = 'Quit buffer',
+      })
+    end)
+  end,
+})
+
+-- make it easier to close man-files when opened inline
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup 'man_unlisted',
+  pattern = { 'man' },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
   end,
 })
 
@@ -895,6 +1008,13 @@ require('lazy').setup(
           --
           -- See :h blink-cmp-config-keymap for defining your own keymap
           preset = 'default',
+          ['<C-y>'] = false,
+          ['<C-l>'] = { 'accept', 'fallback' },
+
+          -- remove old mapping
+          -- ['<C-k>'] = false,
+          -- add new one
+          -- ['<C-s>'] = { 'show_signature', 'hide_signature', 'fallback' },
 
           -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1480,4 +1600,4 @@ require('lazy').setup(
 ) -- }}}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et foldmethod=marker
+-- vim: tabstop=2 softtabstop=2 shiftwidth=2 expandtab foldlevel=99 foldmethod=marker
